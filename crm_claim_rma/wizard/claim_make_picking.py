@@ -155,6 +155,7 @@ class claim_make_picking(orm.TransientModel):
     # If "Create" button pressed
     def action_create_picking(self, cr, uid, ids, context=None):
         picking_obj = self.pool.get('stock.picking')
+        proc_obj = self.pool['procurement.order']
         if context is None:
             context = {}
         view_obj = self.pool.get('ir.ui.view')
@@ -223,8 +224,11 @@ class claim_make_picking(orm.TransientModel):
              },
             context=context)
         # Create picking lines
+        proc_ids = []
         for wizard_claim_line in wizard.claim_line_ids:
             move_obj = self.pool.get('stock.move')
+            if wizard_claim_line.product_id.type not in ['consu', 'product']:
+                continue
             move_id = move_obj.create(
                 cr, uid,
                 {'name': wizard_claim_line.product_id.name_template,
@@ -248,11 +252,30 @@ class claim_make_picking(orm.TransientModel):
             self.pool.get('claim.line').write(
                 cr, uid, wizard_claim_line.id,
                 {write_field: move_id}, context=context)
+            proc_id = proc_obj.create(cr, uid, {
+                'name': wizard_claim_line.product_id.name_template,
+                'origin': claim.number,
+                'date_planned': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                'product_id': wizard_claim_line.product_id.id,
+                'product_qty': wizard_claim_line.product_returned_quantity,
+                'product_uom': wizard_claim_line.product_id.uom_id.id,
+                'location_id': wizard.claim_line_source_location.id,
+                'procure_method': wizard_claim_line.product_id.procure_method,
+                'move_id': move_id,
+                'company_id': claim.company_id.id,
+                'note': note,
+                },
+                context=context)
+            proc_ids.append(proc_id)
         wf_service = netsvc.LocalService("workflow")
         if picking_id:
             wf_service.trg_validate(uid, 'stock.picking',
                                     picking_id, 'button_confirm', cr)
             picking_obj.action_assign(cr, uid, [picking_id])
+        if proc_ids:
+            for proc_id in proc_ids:
+                wf_service.trg_validate(uid, 'procurement.order',
+                                        proc_id, 'button_confirm', cr)
         domain = ("[('type', '=', '%s'), ('partner_id', '=', %s)]" %
                   (p_type, partner_id))
         return {
