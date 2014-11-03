@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ###############################################################################
 #                                                                             #
 #   crm_claim_categ_as_name for OpenERP                                       #
@@ -19,15 +19,24 @@
 #                                                                             #
 ###############################################################################
 
-from osv import fields, osv
 
-class crm_claim(osv.osv):
-    _inherit = 'crm.claim'
+{
+    'name': 'crm_claim_categ_as_name',
+    'version': '1.0',
+    'category': 'Generic Modules/CRM & SRM',
+    'license': 'AGPL-3',
+    'description': """
+    Replace claim name by category. It make easier to filter on claims.
+    """,
+    'author': 'Akretion',
+    'website': 'http://www.akretion.com/',
+    'depends': ['crm_claim_rma'],
+    'data': [
+        'crm_claim_rma_view.xml',
+    ],
+    'demo': [],
+    'installable': True,
+    'active': False,
+}
 
-    _columns = {
-        'name': fields.related('categ_id', 'name', relation='crm.case.categ', type='char', string='Claim Subject', size=128, store=True),
-        'categ_id': fields.many2one('crm.case.categ', 'Category', \
-                            domain="[('section_id','=',section_id),\
-                            ('object_id.model', '=', 'crm.claim')]", required=True),
-    }
-    
+# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

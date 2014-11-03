@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ###############################################################################
 #                                                                             #
 #   crm_claim_categ_as_name for OpenERP                                       #
@@ -19,25 +19,5 @@
 #                                                                             #
 ###############################################################################
 
+from . import crm_claim_rma
 
-{
-    'name': 'crm_claim_categ_as_name',
-    'version': '1.0',
-    'category': 'Generic Modules/CRM & SRM',
-    'license': 'AGPL-3',
-    'description': """
-    
-    """,
-    'author': 'akretion',
-    'website': 'http://www.akretion.com/',
-    'depends': ['crm_claim_rma'],
-    'init_xml': [],
-    'update_xml': [
-        'crm_claim_rma_view.xml',
-    ],
-    'demo_xml': [], 
-    'installable': False,
-    'active': False,
-}
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
