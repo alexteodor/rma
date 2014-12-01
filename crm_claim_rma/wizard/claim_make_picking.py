@@ -152,6 +152,75 @@ class claim_make_picking(orm.TransientModel):
     def action_cancel(self, cr, uid, ids, context=None):
         return {'type': 'ir.actions.act_window_close'}
 
+    def _prepare_picking_vals(self, cr, uid, claim, p_type, partner_id, wizard,
+            note, context=None):
+        return {'origin': claim.number,
+             'type': p_type,
+             'move_type': 'one',  # direct
+             'state': 'draft',
+             'date': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+             'partner_id': partner_id,
+             'invoice_state': "none",
+             'company_id': claim.company_id.id,
+             'location_id': wizard.claim_line_source_location.id,
+             'location_dest_id': wizard.claim_line_dest_location.id,
+             'note': note,
+             'claim_id': claim.id,
+             }
+
+    def _prepare_move_vals(self, cr, uid, wizard_claim_line, partner_id,
+            picking_id, claim, wizard, note, context=None):
+        return {'name': wizard_claim_line.product_id.name_template,
+                 'priority': '0',
+                 'date': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                 'date_expected': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                 'product_id': wizard_claim_line.product_id.id,
+                 'product_qty': wizard_claim_line.product_returned_quantity,
+                 'product_uom': wizard_claim_line.product_id.uom_id.id,
+                 'partner_id': partner_id,
+                 'prodlot_id': wizard_claim_line.prodlot_id.id,
+                 'picking_id': picking_id,
+                 'state': 'draft',
+                 'price_unit': wizard_claim_line.unit_sale_price,
+                 'company_id': claim.company_id.id,
+                 'location_id': wizard.claim_line_source_location.id,
+                 'location_dest_id': wizard.claim_line_dest_location.id,
+                 'note': note,
+                 }
+
+    def _create_move(self, cr, uid, wizard_claim_line, partner_id,
+            picking_id, wizard, claim, note, context=None):
+        move_obj = self.pool['stock.move']
+        move_vals = self._prepare_move_vals(cr, uid, wizard_claim_line,
+                partner_id, picking_id, claim, wizard, note, context=context)
+        move_id = move_obj.create(cr, uid, move_vals, context=context)
+        return move_id
+
+    def _prepare_procurement_vals(self, cr, uid, wizard, claim, move_id,
+            wizard_claim_line, note, context=None):
+        return {
+                'name': wizard_claim_line.product_id.name_template,
+                'origin': claim.number,
+                'date_planned': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                'product_id': wizard_claim_line.product_id.id,
+                'product_qty': wizard_claim_line.product_returned_quantity,
+                'product_uom': wizard_claim_line.product_id.uom_id.id,
+                'location_id': wizard.claim_line_source_location.id,
+                'procure_method': wizard_claim_line.product_id.procure_method,
+                'move_id': move_id,
+                'company_id': claim.company_id.id,
+                'note': note,
+                }
+
+    def _create_procurement(self, cr, uid, wizard, claim, move_id,
+            wizard_claim_line, note, context=None):
+        proc_obj = self.pool['procurement.order']
+        proc_vals = self._prepare_procurement_vals(cr, uid, wizard, claim,
+                move_id, wizard_claim_line, note, context=context)
+        proc_id = proc_obj.create(cr, uid, proc_vals, context=context)
+        return proc_id
+
+
     # If "Create" button pressed
     def action_create_picking(self, cr, uid, ids, context=None):
         picking_obj = self.pool.get('stock.picking')
@@ -207,65 +276,21 @@ class claim_make_picking(orm.TransientModel):
                       'same address.'))
             partner_id = common_dest_partner_id
         # create picking
-        picking_id = picking_obj.create(
-            cr, uid,
-            {'origin': claim.number,
-             'type': p_type,
-             'move_type': 'one',  # direct
-             'state': 'draft',
-             'date': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-             'partner_id': partner_id,
-             'invoice_state': "none",
-             'company_id': claim.company_id.id,
-             'location_id': wizard.claim_line_source_location.id,
-             'location_dest_id': wizard.claim_line_dest_location.id,
-             'note': note,
-             'claim_id': claim.id,
-             },
-            context=context)
+        picking_vals= self._prepare_picking_vals(cr, uid, claim, p_type,
+                partner_id, wizard, note, context=context)
+        picking_id = picking_obj.create(cr, uid, picking_vals, context=context)
         # Create picking lines
         proc_ids = []
         for wizard_claim_line in wizard.claim_line_ids:
-            move_obj = self.pool.get('stock.move')
             if wizard_claim_line.product_id.type not in ['consu', 'product']:
                 continue
-            move_id = move_obj.create(
-                cr, uid,
-                {'name': wizard_claim_line.product_id.name_template,
-                 'priority': '0',
-                 'date': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-                 'date_expected': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-                 'product_id': wizard_claim_line.product_id.id,
-                 'product_qty': wizard_claim_line.product_returned_quantity,
-                 'product_uom': wizard_claim_line.product_id.uom_id.id,
-                 'partner_id': partner_id,
-                 'prodlot_id': wizard_claim_line.prodlot_id.id,
-                 'picking_id': picking_id,
-                 'state': 'draft',
-                 'price_unit': wizard_claim_line.unit_sale_price,
-                 'company_id': claim.company_id.id,
-                 'location_id': wizard.claim_line_source_location.id,
-                 'location_dest_id': wizard.claim_line_dest_location.id,
-                 'note': note,
-                 },
-                context=context)
+            move_id = self._create_move(cr, uid, wizard_claim_line, partner_id,
+                    picking_id, wizard, claim, note, context=context)
             self.pool.get('claim.line').write(
                 cr, uid, wizard_claim_line.id,
                 {write_field: move_id}, context=context)
-            proc_id = proc_obj.create(cr, uid, {
-                'name': wizard_claim_line.product_id.name_template,
-                'origin': claim.number,
-                'date_planned': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-                'product_id': wizard_claim_line.product_id.id,
-                'product_qty': wizard_claim_line.product_returned_quantity,
-                'product_uom': wizard_claim_line.product_id.uom_id.id,
-                'location_id': wizard.claim_line_source_location.id,
-                'procure_method': wizard_claim_line.product_id.procure_method,
-                'move_id': move_id,
-                'company_id': claim.company_id.id,
-                'note': note,
-                },
-                context=context)
+            proc_id = self._create_procurement(cr, uid, wizard, claim, move_id,
+                    wizard_claim_line, note, context=context)
             proc_ids.append(proc_id)
         wf_service = netsvc.LocalService("workflow")
         if picking_id:

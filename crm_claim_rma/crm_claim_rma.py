@@ -194,6 +194,43 @@ class claim_line(orm.Model):
             'sale.order.line',
             string='Sale order line',
             help='The sale order line related to the returned product'),
+        'move_in_state': fields.related(
+            'move_in_id',
+            'state',
+            type='selection',
+            selection=[('draft', 'New'),
+                        ('cancel', 'Cancelled'),
+                        ('waiting', 'Waiting Another Operation'),
+                        ('confirmed', 'Waiting Customer'),
+                        ('assigned', 'Ready to Receive'),
+                        ('done', 'Received')],
+            string='Return state',
+            readonly=True),
+        'move_out_state': fields.related(
+            'move_out_id',
+            'state',
+            type='selection',
+            selection=[('draft', 'New'),
+                        ('cancel', 'Cancelled'),
+                        ('waiting', 'Waiting Another Operation'),
+                        ('confirmed', 'Waiting Availability'),
+                        ('assigned', 'Ready to Deliver'),
+                        ('done', 'Delivered')],
+            string='Delivery state',
+            readonly=True),
+        'refund_state': fields.related(
+            'refund_line_id',
+            'invoice_id',
+            'state',
+            type='selection',
+            selection=[('draft','Draft'),
+                       ('proforma','Pro-forma'),
+                       ('proforma2','Pro-forma'),
+                       ('open','Open'),
+                       ('paid','Paid'),
+                       ('cancel','Cancelled')],
+            string='Refund state',
+            readonly=True),
     }
 
     _defaults = {
@@ -540,9 +577,9 @@ class crm_claim(orm.Model):
         if state not in ['draft', False]:
             warning = {
                 'title': _('Invoice Warning!'),
-                'message' : _('Claims lines can be updated from invoice only '
-                              'when the claim is draft. If you want to change '
-                              'them, create a new claim.')
+                'message': _('Claims lines can be updated from invoice only '
+                             'when the claim is draft. If you want to change '
+                             'them, create a new claim.')
                 }
             return {'warning': warning}
         if not warehouse_id:
