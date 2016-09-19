@@ -177,6 +177,10 @@ class ClaimLine(models.Model):
     invoice_date = fields.Datetime(related='invoice_line_id.invoice_id.'
                                    'create_date',
                                    help="Date of Claim Invoice")
+    order_line_id = fields.Many2one(
+        'sale.order.line',
+        string='Sale order line',
+        help='The sale order line related to the returned product')
 
     # Method to calculate total amount of the line : qty*UP
     @api.multi

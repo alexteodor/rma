@@ -8,6 +8,7 @@ from openerp import _, api, exceptions, fields, models
 
 from .invoice_no_date import InvoiceNoDate
 from .product_no_supplier import ProductNoSupplier
+from collections import defaultdict
 
 
 class CrmClaim(models.Model):
@@ -75,6 +76,10 @@ class CrmClaim(models.Model):
                                    required=True,
                                    default=_get_default_warehouse)
     rma_number = fields.Char(size=128, help='RMA Number provided by supplier')
+    order_id = fields.Many2one(
+        'sale.order',
+        string='Sale order',
+        help="Related original customer sale order")
 
     @api.model
     def _get_claim_type_default(self):
@@ -85,77 +90,54 @@ class CrmClaim(models.Model):
                         help="Claim classification",
                         required=True)
 
-    @api.onchange('invoice_id')
-    def _onchange_invoice(self):
-        # Since no parameters or context can be passed from the view,
-        # this method exists only to call the onchange below with
-        # a specific context (to recreate claim lines).
-        # This does require to re-assign self.invoice_id in the new object
-        claim_with_ctx = self.with_context(
-            create_lines=True
-        )
-        claim_with_ctx.invoice_id = self.invoice_id
-        claim_with_ctx._onchange_invoice_warehouse_type_date()
-        values = claim_with_ctx._convert_to_write(claim_with_ctx._cache)
-        self.update(values)
+    @api.model
+    def _get_claim_line_vals(self, line, location_dest):
+        return {
+            'name': line.name,
+            'claim_origin': 'none',
+            'product_id': line.product_id.id,
+            'unit_sale_price': line.price_unit,
+            'location_dest_id': location_dest.id,
+            'state': 'draft',
+            'order_line_id': line.id,
+            'product_returned_quantity': line.product_uom_qty,
+        }
 
-    @api.onchange('warehouse_id', 'claim_type', 'date')
-    def _onchange_invoice_warehouse_type_date(self):
-        context = self.env.context
-        claim_line = self.env['claim.line']
+    @api.onchange('order_id')
+    def _onchange_sale_order_id(self):
+        claim_lines = []
         if not self.warehouse_id:
             self.warehouse_id = self._get_default_warehouse()
-        claim_type = self.claim_type
-        claim_date = self.date
         warehouse = self.warehouse_id
         company = self.company_id
-        create_lines = context.get('create_lines')
+        claim_line_obj = self.env['claim.line']
+        for line in self.order_id.order_line:
+            location_dest = claim_line_obj.get_destination_location(
+                line.product_id, warehouse)
+            claim_line = self._get_claim_line_vals(line, location_dest)
+            claim_lines.append((0, 0, claim_line))
+        value = self._convert_to_cache(
+            {'claim_line_ids': claim_lines}, validate=False)
+        self.update(value)
+        
+        if self.order_id:
+            self.delivery_address_id = self.order_id.partner_shipping_id
+        if not self.partner_id:
+            self.partner_id = self.order_id.partner_id.id
 
-        def warranty_values(invoice, product):
-            values = {}
-            try:
-                warranty = claim_line._warranty_limit_values(
-                    invoice, claim_type, product, claim_date)
-            except (InvoiceNoDate, ProductNoSupplier):
-                # we don't mind at this point if the warranty can't be
-                # computed and we don't want to block the user
-                values.update({'guarantee_limit': False, 'warning': False})
-            else:
-                values.update(warranty)
+    def onchange_partner_id(self, cr, uid, ids, partner_id,
+                                   email=False, context=None):
+        res = super(CrmClaim, self).onchange_partner_id(cr, uid, ids,
+                                                         partner_id,
+                                                         email=email,
+                                                         context=context)
+        res['domain'] = {}
+        if not partner_id:
+            res['domain']['order_id'] = []
+            return res
+        res['domain']['order_id'] = [('partner_id', '=', partner_id)]
+        return res
 
-            warranty_address = claim_line._warranty_return_address_values(
-                product, company, warehouse)
-            values.update(warranty_address)
-            return values
-
-        if create_lines:  # happens when the invoice is changed
-            claim_lines = []
-            invoices_lines = self.invoice_id.invoice_line_ids.filtered(
-                lambda line: line.product_id.type in ('consu', 'product')
-            )
-            for invoice_line in invoices_lines:
-                location_dest = claim_line.get_destination_location(
-                    invoice_line.product_id, warehouse)
-                line = {
-                    'name': invoice_line.name,
-                    'claim_origin': "none",
-                    'invoice_line_id': invoice_line.id,
-                    'product_id': invoice_line.product_id.id,
-                    'product_returned_quantity': invoice_line.quantity,
-                    'unit_sale_price': invoice_line.price_unit,
-                    'location_dest_id': location_dest.id,
-                    'state': 'draft',
-                }
-                line.update(warranty_values(invoice_line.invoice_id,
-                                            invoice_line.product_id))
-                claim_lines.append((0, 0, line))
-
-            value = self._convert_to_cache(
-                {'claim_line_ids': claim_lines}, validate=False)
-            self.update(value)
-
-        if self.invoice_id:
-            self.delivery_address_id = self.invoice_id.partner_id.id
 
     @api.model
     def message_get_reply_to(self, res_ids, default=None):

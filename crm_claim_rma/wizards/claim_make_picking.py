@@ -218,6 +218,23 @@ class ClaimMakePicking(models.TransientModel):
             'type': 'ir.actions.act_window',
         }
 
+    @api.multi
+    def _prepare_procurement_vals(self, claim_line, group, claim):
+        self.ensure_one()
+        return {
+            'name': claim_line.product_id.name_template,
+            'group_id': group.id,
+            'origin': claim.code,
+            'warehouse_id': self.delivery_warehouse_id.id,
+            'date_planned': time.strftime(DT_FORMAT),
+            'product_id': claim_line.product_id.id,
+            'product_qty': claim_line.product_returned_quantity,
+            'product_uom': claim_line.product_id.product_tmpl_id.uom_id.id,
+            'location_id': self.claim_line_dest_location_id.id,
+            'company_id': claim.company_id.id,
+            }
+        
+
     def _create_procurement(self, claim):
         """ Create a procurement order for each line in this claim and put
         all procurements in a procurement group linked to this claim.
@@ -231,18 +248,8 @@ class ClaimMakePicking(models.TransientModel):
         })
 
         for line in self.claim_line_ids:
-            procurement = self.env['procurement.order'].create({
-                'name': line.product_id.name_template,
-                'group_id': group.id,
-                'origin': claim.code,
-                'warehouse_id': self.delivery_warehouse_id.id,
-                'date_planned': time.strftime(DT_FORMAT),
-                'product_id': line.product_id.id,
-                'product_qty': line.product_returned_quantity,
-                'product_uom': line.product_id.product_tmpl_id.uom_id.id,
-                'location_id': self.claim_line_dest_location_id.id,
-                'company_id': claim.company_id.id,
-            })
+            procurement = self.env['procurement.order'].create(
+                self._prepare_procurement_vals(line, group, claim))
             procurement.run()
 
     @api.multi

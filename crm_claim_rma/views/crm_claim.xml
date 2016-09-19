@@ -182,9 +182,8 @@
                             'required': [('pick','=', False)]}"
                        context="{'tree_view_ref': 'crm_claim_rma.view_partner_contact_tree',
                             'search_default_parent_id': partner_id}"/>
-                <field name="invoice_id"
-                       domain="['|',('commercial_partner_id','=',partner_id),('partner_id','=',partner_id)]"
-                       context="{'create_lines': True}"/>
+                <field name="order_id"
+                       domain="[('partner_id', '=', partner_id)]"/>
             </field>
 
             <xpath expr="//field[@name='email_from']/parent::group" position="after">
@@ -199,7 +198,7 @@
                         <field name="product_id"/>
                         <field name="name"/>
                         <field name="prodlot_id"/>
-                        <field name="invoice_line_id" invisible="True"/>
+                        <field name="order_line_id" invisible="True"/>
                         <field name="warning"/>
                         <field name="warranty_type"/>
                         <button name="set_warranty" string="Compute Warranty"

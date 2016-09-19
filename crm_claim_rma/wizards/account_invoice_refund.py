@@ -20,6 +20,9 @@ class AccountInvoiceRefund(models.TransientModel):
     def compute_refund(self, mode='refund'):
         self.ensure_one()
         invoice_ids = self.env.context.get('invoice_ids', [])
-        if invoice_ids:
-            self = self.with_context(active_ids=invoice_ids)
+        claim_id = self.env.context.get('claim_id', False)
+        claim = self.env['crm.claim'].browse(claim_id)
+        invoices = claim.order_id.invoice_ids
+        if invoices:
+            self = self.with_context(active_ids=invoices.ids)
         return super(AccountInvoiceRefund, self).compute_refund(mode=mode)
