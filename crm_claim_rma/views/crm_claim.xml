@@ -81,15 +81,14 @@
                         context="{'warehouse_id': warehouse_id,
                             'partner_id': partner_id}"/>
 
-                <button name="%(account.action_account_invoice_refund)d"
-                        class="oe_inline"
-                        type='action' string='New Refund'
-                        context="{
-                            'invoice_ids': [invoice_id],
-                            'claim_line_ids': claim_line_ids,
-                            'description': name,
-                            'claim_id': id,
-                            }"/>
+<!--                <button name="%(account.action_account_invoice_refund)d"-->
+<!--                        class="oe_inline"-->
+<!--                        type='action' string='New Refund'-->
+<!--                        context="{-->
+<!--                            'claim_line_ids': claim_line_ids,-->
+<!--                            'description': name,-->
+<!--                            'claim_id': id,-->
+<!--                            }"/>-->
             </xpath>
             <xpath expr="//field[@name='team_id']/parent::group" position="replace">
                 <group colspan="4" col="4" groups="base.group_user">

@@ -13,6 +13,9 @@ class AccountInvoice(models.Model):
 
     claim_id = fields.Many2one('crm.claim', string='Claim')
 
+    # FIXME For now, the refund feature is broken.
+    # It is not used by store discount right now and it's hardly compatible
+    # with claim filled from sale order instead of invoice.
     def _refund_cleanup_lines(self, lines):
         """ Override when from claim to update the quantity and link to the
         claim line.
@@ -31,7 +34,7 @@ class AccountInvoice(models.Model):
         for claim_line in claim_lines:
             if not claim_line.refund_line_id:
                 # For each lines replace quantity and add claim_line_id
-                inv_line = claim_line.invoice_line_id
+                sale_line = claim_line.order_line_id
                 clean_line = {}
                 for field_name, field in inv_line._all_columns.iteritems():
                     column_type = field.column._type
