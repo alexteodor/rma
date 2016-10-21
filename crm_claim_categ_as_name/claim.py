@@ -20,25 +20,18 @@
 #
 ###############################################################################
 
-from openerp.osv import fields, orm
+from openerp import models, fields
 
 
-class crm_claim(orm.Model):
+class CrmClaim(models.Model):
     _inherit = 'crm.claim'
 
-    _columns = {
-        'name': fields.related(
-            'categ_id',
-            'name',
-            relation='crm.case.categ',
-            type='char',
-            string='Claim Subject',
-            size=128,
-            store=True),
-        'categ_id': fields.many2one(
-            'crm.case.categ',
-            'Category',
-            domain="[('section_id', '=', section_id), \
-                    ('object_id.model', '=', 'crm.claim')]",
-            required=True),
-    }
+    name = fields.Char(
+        related='categ_id.name',
+        string='Claim Subject',
+        size=128,
+        store=True)
+    categ_id = fields.Many2one(
+        'crm.claim.category',
+        'Category',
+        required=True)

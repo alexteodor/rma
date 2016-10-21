@@ -22,8 +22,8 @@
 
 
 {
-    'name': 'crm_claim_categ_as_name',
-    'version': '1.0',
+    'name': 'Crm Claim Categ as Name',
+    'version': '9.0.1.0.0',
     'category': 'Generic Modules/CRM & SRM',
     'license': 'AGPL-3',
     'description':
@@ -36,8 +36,5 @@
     'data': [
         'claim_view.xml',
     ],
-    'demo': [],
-    'installable': False,
+    'installable': True,
 }
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
