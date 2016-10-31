@@ -59,6 +59,9 @@
             res_model="stock.picking"
             src_model="crm.claim"/>
 
+    <record model="ir.ui.view" id="crm_claim_type.crm_case_claims_form_view">
+        <field name="priority" eval="25"/>
+    </record>
 
     <record model="ir.ui.view" id="crm_claim_rma_form_view">
         <field name="name">CRM - Claim product return Form</field>
