@@ -11,4 +11,4 @@ class StockPicking(models.Model):
 
     _inherit = "stock.picking"
 
-    claim_id = fields.Many2one('crm.claim', 'Claim')
+    claim_id = fields.Many2one('crm.claim', 'Claim', index=True)

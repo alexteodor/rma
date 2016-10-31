@@ -76,9 +76,13 @@ class ClaimMakePicking(models.TransientModel):
         lines = self.env['claim.line'].\
             search(domain)
         if lines:
-            domain = domain + ['|', (move_field, '=', False),
-                               (move_field + '.state', '=', 'cancel')]
-            lines = lines.search(domain)
+            # Lot faster to filtered
+            lines = lines.filtered(
+                lambda l: getattr(getattr(l, move_field), 'state') == 'cancel'
+                or not getattr(l, move_field))
+#            domain = domain + ['|', (move_field, '=', False),
+#                               (move_field + '.state', '=', 'cancel')]
+#            lines = lines.search(domain)
             if not lines:
                 raise exceptions.UserError(
                     _('A picking has already been created for this claim.')
@@ -196,7 +200,6 @@ class ClaimMakePicking(models.TransientModel):
             move = self.env['stock.move'].create(
                 self._get_picking_line_data(claim, picking, line))
             line.write({write_field: move.id})
-
         if picking:
             picking.signal_workflow('button_confirm')
             picking.action_assign()
@@ -250,6 +253,8 @@ class ClaimMakePicking(models.TransientModel):
         for line in self.claim_line_ids:
             procurement = self.env['procurement.order'].create(
                 self._prepare_procurement_vals(line, group, claim))
+            move_out = procurement.move_ids and procurement.move_ids[0]
+            line.write({'move_out_id': move_out.id})
             procurement.run()
 
     @api.multi
