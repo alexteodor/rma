@@ -248,7 +248,7 @@ class ClaimMakePicking(models.TransientModel):
             'name': claim.code,
             'claim_id': claim.id,
             'move_type': 'direct',
-            'partner_id': claim.partner_id.id
+            'partner_id': claim.delivery_address_id.id
         })
 
         for line in self.claim_line_ids:
