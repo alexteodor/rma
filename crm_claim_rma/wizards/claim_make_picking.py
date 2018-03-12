@@ -236,7 +236,15 @@ class ClaimMakePicking(models.TransientModel):
             'location_id': self.claim_line_dest_location_id.id,
             'company_id': claim.company_id.id,
             }
-        
+
+
+    def _prepare_procurement_group_vals(self, claim):
+        return {
+            'name': claim.code,
+            'claim_id': claim.id,
+            'move_type': 'one',
+            'partner_id': claim.delivery_address_id.id
+        }
 
     def _create_procurement(self, claim):
         """ Create a procurement order for each line in this claim and put
@@ -244,12 +252,8 @@ class ClaimMakePicking(models.TransientModel):
 
         :type claim: crm_claim
         """
-        group = self.env['procurement.group'].create({
-            'name': claim.code,
-            'claim_id': claim.id,
-            'move_type': 'direct',
-            'partner_id': claim.delivery_address_id.id
-        })
+        group_vals = self._prepare_procurement_group_vals(claim)
+        group = self.env['procurement.group'].create(group_vals)
 
         for line in self.claim_line_ids:
             procurement = self.env['procurement.order'].create(
