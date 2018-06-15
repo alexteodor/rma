@@ -30,7 +30,8 @@ class CrmClaim(models.Model):
         related='categ_id.name',
         string='Claim Subject',
         size=128,
-        store=True)
+        store=True,
+        readonly=True)
     categ_id = fields.Many2one(
         'crm.claim.category',
         'Category',
