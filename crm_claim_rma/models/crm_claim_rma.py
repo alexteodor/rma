@@ -106,7 +106,7 @@ class ClaimLine(models.Model):
         help="Quantity returned * Unit sold price",)
     prodlot_id = fields.Many2one(
         'stock.production.lot',
-        string='Serial/Lot n°', help="The serial/lot of the returned product")
+        string=u'Serial/Lot n°', help="The serial/lot of the returned product")
     applicable_guarantee = fields.Selection(
         [('us', 'Company'),
          ('supplier', 'Supplier'),
