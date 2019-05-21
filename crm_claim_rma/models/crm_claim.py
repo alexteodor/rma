@@ -53,10 +53,6 @@ class CrmClaim(models.Model):
 
     claim_line_ids = fields.One2many('claim.line', 'claim_id',
                                      string='Return lines')
-    planned_revenue = fields.Float('Expected revenue')
-    planned_cost = fields.Float('Expected cost')
-    real_revenue = fields.Float()
-    real_cost = fields.Float()
     invoice_ids = fields.One2many('account.invoice', 'claim_id', 'Refunds',
                                   copy=False)
     picking_ids = fields.One2many('stock.picking',
