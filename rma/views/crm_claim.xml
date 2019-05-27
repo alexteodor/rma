@@ -29,38 +29,38 @@
 
     <!-- Right side link to orders -->
     <act_window
-            id="act_crm_claim_rma_sale_orders"
+            id="act_rma_sale_orders"
             name="Quotations and Sales"
             res_model="sale.order"
             src_model="crm.claim"/>
 
     <act_window
-            id="act_crm_claim_rma_purchase_orders"
+            id="act_rma_purchase_orders"
             name="Purchases"
             res_model="purchase.order"
             src_model="crm.claim"/>
 
     <act_window
             domain="[('type', 'in', ('in_invoice', 'out_invoice'))]"
-            id="act_crm_claim_rma_invoice"
+            id="act_rma_invoice"
             name="Invoices"
             res_model="account.invoice"
             src_model="crm.claim"/>
 
     <act_window
-            id="act_crm_claim_rma_refunds"
+            id="act_rma_refunds"
             name="Refunds"
             res_model="account.invoice"
             src_model="crm.claim"
             domain="[('type', 'in', ('in_refund', 'out_refund'))]"/>
 
     <act_window
-            id="act_crm_claim_rma_picking_in"
+            id="act_rma_picking_in"
             name="Incoming Shipment and Returns"
             res_model="stock.picking"
             src_model="crm.claim"/>
 
-    <record model="ir.ui.view" id="crm_claim_rma_form_view">
+    <record model="ir.ui.view" id="rma_form_view">
         <field name="name">CRM - Claim product return Form</field>
         <field name="model">crm.claim</field>
         <field name="inherit_id" ref="crm_claim.crm_case_claims_form_view"/>
@@ -120,14 +120,14 @@
             <xpath expr="//field[@name='name']/parent::group" position="before">
                 <div class="oe_button_box" name="button_box">
                     <button class="oe_stat_button"
-                            name="%(act_crm_claim_rma_sale_orders)d"
+                            name="%(act_rma_sale_orders)d"
                             type="action"
                             icon="fa-strikethrough"
                             string="Sales"
                             attrs="{'invisible': ['|',('partner_id','=', False)]}"
                             context="{'search_default_partner_id': [partner_id], 'search_default_user_id':False}"/>
                     <button class="oe_stat_button"
-                            name="%(act_crm_claim_rma_purchase_orders)d"
+                            name="%(act_rma_purchase_orders)d"
                             type="action"
                             icon="fa-shopping-cart"
                             string="Purchases"
@@ -136,7 +136,7 @@
                             'search_default_user_id':False}"/>
 
                     <button class="oe_stat_button"
-                            name="%(act_crm_claim_rma_invoice)d"
+                            name="%(act_rma_invoice)d"
                             type="action"
                             string="Invoices"
                             icon="fa-pencil-square"
@@ -144,7 +144,7 @@
                             context="{'search_default_partner_id': [partner_id], 'group_by':'type', 'search_default_user_id':False}"/>
 
                     <button class="oe_stat_button"
-                            name="%(act_crm_claim_rma_refunds)d"
+                            name="%(act_rma_refunds)d"
                             type="action"
                             string="Refunds"
                             icon="fa-file-text"
@@ -153,7 +153,7 @@
 
                     <button class="oe_stat_button"
                             icon="fa-reply"
-                            name="%(act_crm_claim_rma_picking_in)d"
+                            name="%(act_rma_picking_in)d"
                             type="action"
                             string="Returns"
                             attrs="{'invisible': ['|',('partner_id','=', False), ('claim_type','in', ['supplier','other'])]}"
@@ -184,7 +184,7 @@
                        domain="[('id','child_of',partner_id)]"
                        attrs="{'invisible': ['|',('pick','=', True)],
                             'required': [('pick','=', False)]}"
-                       context="{'tree_view_ref': 'crm_claim_rma.view_partner_contact_tree',
+                       context="{'tree_view_ref': 'rma.view_partner_contact_tree',
                             'search_default_parent_id': partner_id}"/>
                 <field name="invoice_id"
                        domain="['|',('commercial_partner_id','=',partner_id),('partner_id','=',partner_id)]"
@@ -247,7 +247,7 @@
             sequence="2"/>
 
     <!-- Update account invoice !-->
-    <record id="crm_claim_rma_form" model="ir.ui.view">
+    <record id="rma_form" model="ir.ui.view">
         <field name="name">CRM Claim RMA</field>
         <field name="model">crm.claim</field>
         <field name="inherit_id" ref="crm_claim.crm_case_claims_form_view"/>
@@ -258,7 +258,7 @@
         </field>
     </record>
 
-    <record id="search_crm_claim_rma_number" model="ir.ui.view">
+    <record id="search_rma_number" model="ir.ui.view">
         <field name="name">CRM - Claims Search</field>
         <field name="model">crm.claim</field>
         <field name="inherit_id" ref="crm_claim.view_crm_case_claims_filter"/>
@@ -269,7 +269,7 @@
         </field>
     </record>
 
-    <record id="tree_crm_claim_rma_number" model="ir.ui.view">
+    <record id="tree_rma_number" model="ir.ui.view">
         <field name="name">CRM - Claims Tree</field>
         <field name="model">crm.claim</field>
         <field name="inherit_id" ref="crm_claim.crm_case_claims_tree_view"/>
