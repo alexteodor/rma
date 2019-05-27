@@ -7,7 +7,7 @@
 
 from odoo import api, models
 
-
+# TODO move in rma_from_invoice
 class AccountInvoiceLine(models.Model):
 
     _inherit = "account.invoice.line"

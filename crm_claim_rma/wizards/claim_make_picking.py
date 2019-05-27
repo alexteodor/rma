@@ -9,6 +9,7 @@ import time
 from odoo import models, fields, exceptions, api, _
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FORMAT
 
+# TODO move some part in rma_delivery (all code to delivery a new picking)
 
 class ClaimMakePicking(models.TransientModel):
     _name = 'claim_make_picking.wizard'

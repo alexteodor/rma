@@ -71,6 +71,8 @@ class CrmClaim(models.Model):
     warehouse_id = fields.Many2one('stock.warehouse', string='Warehouse',
                                    required=True,
                                    default=_get_default_warehouse)
+    # TODO show it conditionnaly depending on claim type
+    # we will need to add a selection field on the claim type (supplier/customer)
     rma_number = fields.Char(size=128, help='RMA Number provided by supplier')
 
     @api.model
@@ -82,6 +84,7 @@ class CrmClaim(models.Model):
                         help="Claim classification",
                         required=True)
 
+    # TODO move this code in rma_from_invoice
     @api.onchange('invoice_id')
     def _onchange_invoice(self):
         # Since no parameters or context can be passed from the view,
@@ -108,6 +111,8 @@ class CrmClaim(models.Model):
         company = self.company_id
         create_lines = context.get('create_lines')
 
+        # TODO move all warranty code in rma_warranty
+        # that will depend on rma_from_invoice
         def warranty_values(invoice, product):
             values = {}
             try:
