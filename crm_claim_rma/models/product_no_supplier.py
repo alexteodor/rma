@@ -6,7 +6,7 @@
 # © 2009-2013 Akretion,
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-
+# TODO use UserError exception
 class ProductNoSupplier(Exception):
     """ Raised when a warranty cannot be computed for a claim line
     because the product has no supplier.

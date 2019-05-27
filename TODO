@@ -1,0 +1,13 @@
+
+- creer un RMA a partir de plusieurs source
+rma:
+ - ajouter le notion de produit obligatoire/cacher sur par rapport a la category choisi
+ - ajouter la notion de selection "from product ". les autres ajouterons from picking / from sale"
+rma_from_invoice
+rma_from_picking (depend de rma_from_invoice avec une explication)
+rma_from_sale (depend de rma_from_invoice avec une explication)
+
+
+- splitter la partie garantie (mettre dans un module a part qui dépend rma_from_invoice)
+- rma_warranty
+

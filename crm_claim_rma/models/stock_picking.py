@@ -7,7 +7,7 @@
 
 from odoo import fields, models
 
-
+# TODO move in rma_delivery
 class StockPicking(models.Model):
 
     _inherit = "stock.picking"

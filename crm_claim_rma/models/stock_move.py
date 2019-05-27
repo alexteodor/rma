@@ -7,7 +7,7 @@
 
 from odoo import api, models
 
-
+# TODO move in rma_delivery
 class StockMove(models.Model):
 
     _name = 'stock.move'

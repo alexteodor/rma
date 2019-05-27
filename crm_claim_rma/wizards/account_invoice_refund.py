@@ -7,7 +7,7 @@
 
 from odoo import api, fields, models
 
-
+# TODO move in rma_from_invoice
 class AccountInvoiceRefund(models.TransientModel):
     _inherit = "account.invoice.refund"
 

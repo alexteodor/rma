@@ -5,7 +5,7 @@
 
 from odoo import fields, models
 
-
+# TODO move in rma delivery
 class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
 
