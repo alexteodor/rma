@@ -9,6 +9,7 @@
         <field name="arch" type="xml">
             <field name="stage_id" position="after">
                 <field name="team_id"/>
+                <field name="rma_number" invisible="1"/>
             </field>
         </field>
     </record>
@@ -19,6 +20,9 @@
         <field name="model">crm.claim</field>
         <field name="inherit_id" ref="crm_claim.view_crm_case_claims_filter"/>
         <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="rma_number"/>
+            </xpath>
             <xpath expr="/search/group/filter[position()=2]" position="after">
                 <filter string="Sales Team" icon="terp-stock_symbol-selection"
                         domain="[]"
@@ -71,6 +75,7 @@
                         string="New Products Return"
                         class="oe_inline"
                         type="action" target="new"
+                        attrs="{'invisible': [('has_product', '!=', True)]}"
                         context="{'warehouse_id': warehouse_id,
                             'partner_id': partner_id}"/>
             </xpath>
@@ -82,7 +87,10 @@
                            context="{'default_groups_ref': ['base.group_user', 'base.group_partner_manager', 'base.group_sale_salesman_all_leads']}"/>
                     <field name="priority" widget="priority"/>
                     <field name="date_deadline"/>
+                    <field name="rma_number" attrs="{'invisible': [('origin_type', '!=', 'supplier')]}"/>
                     <field name="team_id"/>
+                    <field name="has_product" invisible="1"/>
+                    <field name="origin_type" invisible="1"/>
                 </group>
             </xpath>
 
@@ -174,9 +182,10 @@
                 <div name="serial">
                     <!-- Place for mass return button from crm_rma_lot_mass_return -->
                 </div>
-                <separator colspan="2" string="Product Returns"/>
-                <field name="claim_line_ids">
-                    <tree string="Returned lines" create="false">
+                <separator colspan="2" string="Product Returns" attrs="{'invisible': [('has_product', '!=', True)]}"/>
+                <field name="claim_line_ids"
+                    attrs="{'invisible': [('has_product', '!=', True)]}">
+                    <tree string="Returned lines">
                         <field name="claim_id" invisible="1"/>
                         <field name="state"/>
                         <field name="product_id"/>
@@ -192,9 +201,7 @@
 
             <!-- New tabs for products return and generated documents -->
             <xpath expr="//field[@name='email_from']/ancestor::page" position="after">
-                <page string="Generated Documents">
-                    <separator colspan="2" string="Refunds"/>
-                    <field name="invoice_ids" colspan="4" readonly="1"/>
+                <page string="Generated Documents" name="documents" attrs="{'invisible': [('has_product', '!=', True)]}">
                     <separator colspan="2" string="Receptions / Deliveries"/>
                     <field name="picking_ids" colspan="4" readonly="1"/>
                 </page>
@@ -219,39 +226,5 @@
             parent="crm_claim.menu_config_claim"
             action="act_crm_claim_substates"
             sequence="2"/>
-
-    <!-- Update account invoice !-->
-    <record id="rma_form" model="ir.ui.view">
-        <field name="name">CRM Claim RMA</field>
-        <field name="model">crm.claim</field>
-        <field name="inherit_id" ref="crm_claim.crm_case_claims_form_view"/>
-        <field name="arch" type="xml">
-                <xpath expr="//field[@name='date_deadline']" position="after">
-                    <field name="rma_number"/>
-                </xpath>
-        </field>
-    </record>
-
-    <record id="search_rma_number" model="ir.ui.view">
-        <field name="name">CRM - Claims Search</field>
-        <field name="model">crm.claim</field>
-        <field name="inherit_id" ref="crm_claim.view_crm_case_claims_filter"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='name']" position="after">
-                <field name="rma_number"/>
-            </xpath>
-        </field>
-    </record>
-
-    <record id="tree_rma_number" model="ir.ui.view">
-        <field name="name">CRM - Claims Tree</field>
-        <field name="model">crm.claim</field>
-        <field name="inherit_id" ref="crm_claim.crm_case_claims_tree_view"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='name']" position="after">
-                <field name="rma_number"/>
-            </xpath>
-        </field>
-   </record>
 
 </odoo>

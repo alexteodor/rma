@@ -30,6 +30,8 @@
         'data/crm_claim_category.xml',
         'wizards/claim_make_picking.xml',
         'views/crm_claim.xml',
+        'views/crm_claim_category.xml',
+        'views/crm_claim_type.xml',
         "views/claim_line.xml",
         'views/res_partner.xml',
         'views/stock_view.xml',

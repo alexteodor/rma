@@ -66,8 +66,12 @@ class CrmClaim(models.Model):
     warehouse_id = fields.Many2one('stock.warehouse', string='Warehouse',
                                    required=True,
                                    default=_get_default_warehouse)
-    # TODO show it conditionnaly depending on claim type
-    # we will need to add a selection field on the claim type (supplier/customer)
+    has_product = fields.Boolean(
+        related='categ_id.has_product',
+        readonly=True)
+    origin_type = fields.Selection(
+        related='claim_type.origin_type',
+        readonly=True)
     rma_number = fields.Char(size=128, help='RMA Number provided by supplier')
 
     @api.model
