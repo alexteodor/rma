@@ -23,13 +23,11 @@
         'stock',
         'crm_claim_rma_code',
         'crm_rma_location',
-        'product_warranty',
     ],
     'data': [
         'data/ir_sequence_type.xml',
         'data/crm_team.xml',
         'data/crm_claim_category.xml',
-        'views/account_invoice.xml',
         'wizards/claim_make_picking.xml',
         'views/crm_claim.xml',
         "views/claim_line.xml",

@@ -9,7 +9,6 @@ import time
 from odoo import models, fields, exceptions, api, _
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FORMAT
 
-# TODO move some part in rma_delivery (all code to delivery a new picking)
 
 class ClaimMakePicking(models.TransientModel):
     _name = 'claim_make_picking.wizard'
@@ -23,15 +22,6 @@ class ClaimMakePicking(models.TransientModel):
         dests = lines.mapped('location_dest_id')
         dests = list(set(dests))
         return dests[0] if len(dests) == 1 else self.env['stock.location']
-
-    @api.returns('res.partner')
-    def _get_common_partner_from_line(self, lines):
-        """ If all the lines have the same warranty return partner return that,
-        else return an empty recordset
-        """
-        partners = lines.mapped('warranty_return_partner')
-        partners = list(set(partners))
-        return partners[0] if len(partners) == 1 else self.env['res.partner']
 
     @api.model
     def _default_claim_line_source_location_id(self):
@@ -48,16 +38,11 @@ class ClaimMakePicking(models.TransientModel):
     def _default_claim_line_dest_location_id(self):
         """Return the location_id to use as destination.
 
-        If it's an outoing shipment: take the customer stock property
         If it's an incoming shipment take the location_dest_id common to all
         lines, or if different, return None.
         """
         picking_type = self.env.context.get('picking_type')
         partner_id = self.env.context.get('partner_id')
-
-        if picking_type == 'out' and partner_id:
-            return self.env['res.partner'].browse(
-                partner_id).property_stock_customer
 
         if picking_type == 'in' and partner_id:
             # Add the case of return to supplier !
@@ -122,7 +107,7 @@ class ClaimMakePicking(models.TransientModel):
             'move_type': 'one',  # direct
             'state': 'draft',
             'date': time.strftime(DT_FORMAT),
-            'partner_id': partner_id,
+            'partner_id': claim.delivery_address_id.id,
             'company_id': claim.company_id.id,
             'location_id': self.claim_line_source_location_id.id,
             'location_dest_id': self.claim_line_dest_location_id.id,
@@ -139,7 +124,6 @@ class ClaimMakePicking(models.TransientModel):
             'product_id': line.product_id.id,
             'product_uom_qty': line.product_returned_quantity,
             'product_uom': line.product_id.product_tmpl_id.uom_id.id,
-            'partner_id': claim.delivery_address_id.id,
             'picking_id': picking.id,
             'state': 'draft',
             'price_unit': line.unit_sale_price,
@@ -149,47 +133,16 @@ class ClaimMakePicking(models.TransientModel):
             'note': self._get_picking_note(),
         }
 
-    def _create_picking(self, claim, picking_type):
-        warehouse_rec = self.env['stock.warehouse'].browse(
-            self.env.context.get('warehouse_id')
-        )
-        if picking_type == 'in':
-            picking_type = warehouse_rec.in_type_id
-            write_field = 'move_in_id'
-        else:
-            picking_type = warehouse_rec.out_type_id
-            write_field = 'move_out_id'
+    @api.returns('res.partner')
+    def _get_partner(self, claim):
+        return claim.delivery_address_id
 
-        partner_id = claim.delivery_address_id.id
-        claim_lines = self.claim_line_ids
-
-        # In case of product return, we don't allow one picking for various
-        # product if location are different
-        # or if partner address is different
-        if self.env.context.get('product_return'):
-            common_dest_location = self._get_common_dest_location_from_line(
-                claim_lines)
-            if not common_dest_location:
-                raise exceptions.UserError(
-                    _('A product return cannot be created for various '
-                      'destination locations, please choose line with a '
-                      'same destination location.')
-                )
-
-            claim_lines.auto_set_warranty()
-            common_dest_partner = self._get_common_partner_from_line(
-                claim_lines)
-            if not common_dest_partner:
-                raise exceptions.UserError(
-                    _('A product return cannot be created for various '
-                      'destination addresses, please choose line with a '
-                      'same address.')
-                )
-            partner_id = common_dest_partner.id
+    def _create_picking(self, claim, picking_type, write_field):
+        partner = self._get_partner(claim)
 
         # create picking
         picking = self.env['stock.picking'].create(
-            self._get_picking_data(claim, picking_type, partner_id))
+            self._get_picking_data(claim, picking_type, partner.id))
 
         # Create picking lines
         for line in self.claim_line_ids:
@@ -202,7 +155,7 @@ class ClaimMakePicking(models.TransientModel):
             picking.action_assign()
 
         domain = ("[('picking_type_id', '=', %s), ('partner_id', '=', %s)]" %
-                  (picking_type.id, partner_id))
+                  (picking_type.id, partner.id))
 
         view_id = self.env['ir.ui.view'].search(
             [('model', '=', 'stock.picking'),
@@ -218,43 +171,17 @@ class ClaimMakePicking(models.TransientModel):
             'type': 'ir.actions.act_window',
         }
 
-    def _create_procurement(self, claim):
-        """ Create a procurement order for each line in this claim and put
-        all procurements in a procurement group linked to this claim.
-
-        :type claim: crm_claim
-        """
-        group = self.env['procurement.group'].create({
-            'name': claim.code,
-            'claim_id': claim.id,
-            'move_type': 'direct',
-        })
-
-        for line in self.claim_line_ids:
-            procurement = self.env['procurement.order'].create({
-                'name': line.product_id.name,
-                'group_id': group.id,
-                'origin': claim.code,
-                'warehouse_id': self.delivery_warehouse_id.id,
-                'date_planned': time.strftime(DT_FORMAT),
-                'product_id': line.product_id.id,
-                'product_qty': line.product_returned_quantity,
-                'product_uom': line.product_id.product_tmpl_id.uom_id.id,
-                'location_id': self.claim_line_dest_location_id.id,
-                'company_id': claim.company_id.id,
-            })
-            procurement.run()
-
     @api.multi
     def action_create_picking(self):
         claim = self.env['crm.claim'].browse(self.env.context['active_id'])
         picking_type = self.env.context.get('picking_type')
-
-        if picking_type == 'out':
-            return self._create_procurement(claim)
-
-        else:
-            return self._create_picking(claim, picking_type)
+        warehouse_rec = self.env['stock.warehouse'].browse(
+            self.env.context.get('warehouse_id')
+        )
+        if picking_type == 'in':
+            picking_type = warehouse_rec.in_type_id
+            write_field = 'move_in_id'
+        return self._create_picking(claim, picking_type, write_field)
 
     @api.multi
     def action_cancel(self):
