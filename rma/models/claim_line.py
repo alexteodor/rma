@@ -5,12 +5,6 @@
 # © 2009-2013 Akretion,
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-import calendar
-import math
-from datetime import datetime
-
-from dateutil.relativedelta import relativedelta
-
 from odoo import _, api, exceptions, fields, models
 
 
