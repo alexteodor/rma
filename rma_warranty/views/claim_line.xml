@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_crm_claim_lines_filter" model="ir.ui.view">
+        <field name="name">CRM - Claims Search</field>
+        <field name="model">claim.line</field>
+        <field name="inherit_id" ref="rma.view_crm_claim_lines_filter"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="warning" select='1'/>
+            </field>
+            <field name="last_state_change" position="after">
+                <field name="guarantee_limit" select='1'/>
+            </field>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="crm_claim_line_tree_view">
+        <field name="name">CRM - Claims Tree</field>
+        <field name="model">claim.line</field>
+        <field name="inherit_id" ref="rma.crm_claim_line_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="prodlot_id" position="after">
+                <field name="warning"/>
+                <field name="warranty_type"/>
+                <field name="warranty_return_partner"/>
+                <button name="set_warranty" string="Compute Warranty" type="object" icon="gtk-justify-fill"/>
+            </field>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="crm_claim_line_form_view">
+        <field name="name">CRM - Claim product return line Form</field>
+        <field name="model">claim.line</field>
+        <field name="inherit_id" ref="rma.crm_claim_line_form_view"/>
+        <field name="arch" type="xml">
+            <field name="state" position="before">
+                <button name="set_warranty"
+                    string="Calculate warranty state"
+                    type="object" class="oe_highlight"/>
+            </field>
+            <group name="links" position="before">
+                <group string="Warranty">
+                    <field name="guarantee_limit"/>
+                    <field name="warning"/>
+                    <!-- <field name="warranty_type"/> -->
+                    <field name="warranty_return_partner"/>
+                </group>
+            </group>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record model="ir.ui.view" id="rma_form_view">
+        <field name="name">CRM - Claim product return Form</field>
+        <field name="model">crm.claim</field>
+        <field name="inherit_id" ref="rma.rma_form_view"/>
+        <field name="arch" type="xml">
+            <field name="invoice_line_id" postion="after">
+                <field name="warning"/>
+                <field name="warranty_type"/>
+                <button name="set_warranty" string="Compute Warranty"
+                        type="object" icon="gtk-justify-fill"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>
