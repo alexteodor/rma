@@ -29,6 +29,7 @@
                 <newline/>
                 <group expand="0" string="Group By...">
                     <filter string="Product" icon="terp-product"
+                            name="group_by_product"
                             domain="[]" help="Product"
                             context="{'group_by':'product_id'}"/>
                     <separator orientation="vertical"/>
@@ -108,7 +109,7 @@
                     </group>
                     <group name="details">
                         <group string="Linked Document" name="links">
-                            <field name="claim_id" readonly="1"/>
+                            <field name="claim_id" invisible="1"/>
                             <field name="move_in_id" readonly="1"/>
                         </group>
                         <separator string="State" colspan="4"/>

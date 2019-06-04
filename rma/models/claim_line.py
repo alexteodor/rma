@@ -45,7 +45,7 @@ class ClaimLine(models.Model):
             raise exceptions.UserError(
                 _('There is no warehouse for the current user\'s company.')
             )
-        return wh.lot_stock_id
+        return self.get_destination_location(wh)
 
     number = fields.Char(
         readonly=True,
@@ -174,3 +174,11 @@ class ClaimLine(models.Model):
         for line_id in self:
             line_id.display_name = "%s - %s" % (
                 line_id.claim_id.code, line_id.name)
+
+    @api.returns('stock.location')
+    def get_destination_location(self, warehouse, product=None):
+        """ Compute and return the destination location to take
+        for a return
+        """
+        location_dest = warehouse.lot_stock_id
+        return location_dest

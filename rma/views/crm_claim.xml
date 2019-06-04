@@ -185,7 +185,7 @@
                 <separator colspan="2" string="Product Returns" attrs="{'invisible': [('has_product', '!=', True)]}"/>
                 <field name="claim_line_ids"
                     attrs="{'invisible': [('has_product', '!=', True)]}">
-                    <tree string="Returned lines">
+                    <tree string="Returned lines" name="returned_lines">
                         <field name="claim_id" invisible="1"/>
                         <field name="state"/>
                         <field name="product_id"/>
