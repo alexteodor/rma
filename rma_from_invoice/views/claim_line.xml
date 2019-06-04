@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_crm_claim_lines_filter" model="ir.ui.view">
+        <field name="name">CRM - Claims Search</field>
+        <field name="model">claim.line</field>
+        <field name="inherit_id" ref="rma.view_crm_claim_lines_filter"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="invoice_line_id" select='1' readonly='1'/>
+            </field>
+            <filter name="group_by_product" position="before">
+                <filter string="Invoice" icon="terp-dolar"
+                        domain="[]" help="Invoice"
+                        context="{'group_by':'invoice_id'}"/>
+            </filter>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="crm_claim_line_tree_view">
+        <field name="name">CRM - Claims Tree</field>
+        <field name="model">claim.line</field>
+        <field name="inherit_id" ref="rma.crm_claim_line_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="claim_diagnosis" position="after">
+                <field name="refund_line_id"/>
+                <field name="invoice_line_id"/>
+            </field>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="crm_claim_line_form_view">
+        <field name="name">CRM - Claim product return line Form</field>
+        <field name="model">claim.line</field>
+        <field name="inherit_id" ref="rma.crm_claim_line_form_view"/>
+        <field name="arch" type="xml">
+            <field name="claim_id" position="after">
+                <field name="invoice_line_id" readonly="1"/>
+                <field name="refund_line_id" readonly="1"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

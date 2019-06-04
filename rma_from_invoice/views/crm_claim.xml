@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record model="ir.ui.view" id="rma_form_view">
+        <field name="name">CRM - Claim product return Form</field>
+        <field name="model">crm.claim</field>
+        <field name="inherit_id" ref="rma.rma_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='stage_id']" position="before">
+                <button name="%(account.action_account_invoice_refund)d"
+                        class="oe_inline"
+                        type='action' string='New Refund'
+                        context="{
+                            'invoice_ids': [invoice_id],
+                            'claim_line_ids': claim_line_ids,
+                            'description': name,
+                            'claim_id': id,
+                            }"/>
+            </xpath>
+            <field name="delivery_address_id" position="after">
+                <field name="invoice_id"
+                       domain="['|',('commercial_partner_id','=',partner_id),('partner_id','=',partner_id)]"
+                       context="{'create_lines': True}"/>
+            </field>
+            <tree name="returned_lines" position="attributes">
+                <attribute name="create">false</attribute>
+            </tree>
+            <xpath expr="//field[@name='claim_line_ids']/tree/field[@name='prodlot_id']" position="after">
+                <field name="invoice_line_id"/>
+            </xpath>
+            <page name="documents" position="inside">
+                <separator colspan="2" string="Refunds"/>
+                <field name="invoice_ids" colspan="4" readonly="1"/>
+            </page>
+        </field>
+    </record>
+
+</odoo>
