@@ -35,7 +35,12 @@ class ClaimMakePicking(models.TransientModel):
         # return empty recordset, see https://github.com/odoo/odoo/issues/4384
         return self.env['stock.location']
 
+    @api.model
     def _default_claim_line_dest_location_id(self):
+        return self._get_claim_line_dest_location()
+
+    @api.returns('stock.location')
+    def _get_claim_line_dest_location(self):
         """Return the location_id to use as destination.
 
         If it's an incoming shipment take the location_dest_id common to all
