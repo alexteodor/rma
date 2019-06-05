@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record model="ir.ui.view" id="rma_form_view">
+        <field name="name">CRM - Claim product return Form</field>
+        <field name="model">crm.claim</field>
+        <field name="inherit_id" ref="rma.rma_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='stage_id']" position="before">
+                <button name="%(action_claim_picking_out)d"
+                        class="oe_inline"
+                        string="New Delivery"
+                        type="action" target="new"
+                        context="{'warehouse_id': warehouse_id,
+                            'partner_id': partner_id}"/>
+            </xpath>
+        </field>
+   </record>
+
+</odoo>

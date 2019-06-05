@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_claim_picking_out" model="ir.actions.act_window">
+        <field name="name">Create Outgoing Shipments</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">claim_make_picking.wizard</field>
+        <field name="src_model">crm.claim</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'picking_type': 'out'}</field>
+    </record>
+
+</odoo>
