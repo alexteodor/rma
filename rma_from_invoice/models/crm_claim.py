@@ -23,15 +23,17 @@ class CrmClaim(models.Model):
         # a specific context (to recreate claim lines).
         # This does require to re-assign self.invoice_id in the new object
         claim_with_ctx = self.with_context(
-            create_lines=True
+            create_lines=True, claim_from='invoice'
         )
         claim_with_ctx.invoice_id = self.invoice_id
-        claim_with_ctx._onchange_invoice_warehouse_type_date()
+        claim_with_ctx._onchange_warehouse_type_date()
         values = claim_with_ctx._convert_to_write(claim_with_ctx._cache)
         self.update(values)
+        if self.invoice_id:
+            self.delivery_address_id = self.invoice_id.partner_id.id
 
     @api.onchange('warehouse_id', 'claim_type', 'date')
-    def _onchange_invoice_warehouse_type_date(self):
+    def _onchange_warehouse_type_date(self):
         context = self.env.context
         if not self.warehouse_id:
             self.warehouse_id = self._get_default_warehouse()
@@ -39,24 +41,25 @@ class CrmClaim(models.Model):
         warehouse = self.warehouse_id
         create_lines = context.get('create_lines')
 
-        if create_lines:  # happens when the invoice is changed
-            claim_lines = []
-            invoices_lines = self.invoice_id.invoice_line_ids.filtered(
-                lambda line: line.product_id.type in ('consu', 'product')
-            )
-            for invoice_line in invoices_lines:
-                line_vals = self._prepare_claim_line(invoice_line, warehouse)
-                claim_lines.append((0, 0, line_vals))
-
+        if create_lines:
+            claim_lines = getattr(self, '_create_claim_lines_from_%s' % context.get('claim_from'))(warehouse)
             value = self._convert_to_cache(
                 {'claim_line_ids': claim_lines}, validate=False)
             self.update(value)
 
-        if self.invoice_id:
-            self.delivery_address_id = self.invoice_id.partner_id.id
+    @api.model
+    def _create_claim_lines_from_invoice(self, warehouse):
+        lines = self.invoice_id.invoice_line_ids.filtered(
+            lambda line: line.product_id.type in ('consu', 'product')
+        )
+        claim_lines = []
+        for invoice_line in lines:
+            line_vals = self._prepare_claim_line_from_invoice(invoice_line, warehouse)
+            claim_lines.append((0, 0, line_vals))
+        return claim_lines
 
     @api.model
-    def _prepare_claim_line(self, invoice_line, warehouse):
+    def _prepare_claim_line_from_invoice(self, invoice_line, warehouse):
         self.ensure_one()
         claim_line = self.env['claim.line']
         location_dest = claim_line.get_destination_location(
