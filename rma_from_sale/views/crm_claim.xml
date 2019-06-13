@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record model="ir.ui.view" id="rma_form_view">
+        <field name="name">CRM - Claim product return Form</field>
+        <field name="model">crm.claim</field>
+        <field name="inherit_id" ref="rma.rma_form_view"/>
+        <field name="arch" type="xml">
+            <field name="delivery_address_id" position="after">
+                <field name="sale_id"
+                       domain="[('partner_id','=',partner_id)]"
+                       context="{'create_lines': True}"/>
+            </field>
+            <tree name="returned_lines" position="attributes">
+                <attribute name="create">false</attribute>
+            </tree>
+            <xpath expr="//field[@name='claim_line_ids']/tree/field[@name='prodlot_id']" position="after">
+                <field name="sale_line_id"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
