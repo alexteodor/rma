@@ -21,6 +21,7 @@
         'rma',
     ],
     'data': [
+        'views/account_invoice.xml',
         'views/crm_claim.xml',
         'views/claim_line.xml',
     ],
