@@ -9,8 +9,12 @@
         <field name="priority" eval="16"/>
         <field name="arch" type="xml">
             <data>
-                <xpath expr="//group[@name='sales_person']/field[@name='client_order_ref']" position="after">
-                    <field name="claim_id"/>
+                <xpath expr="//group[@name='sales_person']/.." position="inside">
+                    <newline/>
+                    <group name="claims" colspan="2" col="2">
+                        <separator string="Claims" colspan="2"/>
+                        <field name="claim_ids" colspan="2" nolabel="1"/>
+                    </group>
                 </xpath>
             </data>
         </field>

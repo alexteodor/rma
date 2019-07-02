@@ -11,4 +11,6 @@ from odoo import fields, models
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
-    claim_id = fields.Many2one('crm.claim', string='Claim')
+    claim_ids = fields.One2many(
+        comodel_name='crm.claim', inverse_name='sale_id', string='Claims'
+    )
