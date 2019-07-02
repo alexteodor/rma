@@ -32,12 +32,12 @@
     """,
     'author': "akretion,Odoo Community Association (OCA)",
     'website': 'http://www.akretion.com/',
-    'depends': ['crm_claim_rma'],
+    'depends': ['rma'],
     'data': [
         'claim_view.xml',
     ],
     'demo': [],
-    'installable': False,
+    'installable': True,
 }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
