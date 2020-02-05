@@ -8,7 +8,7 @@
         <field name="arch" type="xml">
             <field name="delivery_address_id" position="after">
                 <field name="sale_id"
-                       domain="[('partner_id','=',partner_id)]"
+                       domain="['|', ('partner_id','child_of',partner_id), ('partner_id', 'parent_of', partner_id)]"
                        context="{'create_lines': True}"/>
             </field>
             <tree name="returned_lines" position="attributes">
