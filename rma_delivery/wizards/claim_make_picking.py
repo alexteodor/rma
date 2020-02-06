@@ -52,6 +52,7 @@ class ClaimMakePicking(models.TransientModel):
                 'product_uom': line.product_id.product_tmpl_id.uom_id.id,
                 'location_id': self.claim_line_dest_location_id.id,
                 'company_id': claim.company_id.id,
+                'route_ids': [(4, claim.warehouse_id.rma_out_route_id.id)],
             })
             procurement.run()
             line.move_out_id = procurement.move_ids[0].id

@@ -184,7 +184,7 @@ class ClaimMakePicking(models.TransientModel):
             self.env.context.get('warehouse_id')
         )
         if picking_type == 'in':
-            picking_type = warehouse_rec.in_type_id
+            picking_type = warehouse_rec.rma_in_type_id
             write_field = 'move_in_id'
         return self._create_picking(claim, picking_type, write_field)
 
