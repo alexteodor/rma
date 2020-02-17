@@ -158,6 +158,8 @@ class ClaimMakePicking(models.TransientModel):
         if picking:
             picking.signal_workflow('button_confirm')
             picking.action_assign()
+            if picking_type == 'in':
+                picking.force_assign()
 
         domain = ("[('picking_type_id', '=', %s), ('partner_id', '=', %s)]" %
                   (picking_type.id, partner.id))
