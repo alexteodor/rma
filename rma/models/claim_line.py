@@ -174,5 +174,5 @@ class ClaimLine(models.Model):
         """ Compute and return the destination location to take
         for a return
         """
-        location_dest = warehouse.lot_stock_id
+        location_dest = warehouse.lot_rma_id
         return location_dest
