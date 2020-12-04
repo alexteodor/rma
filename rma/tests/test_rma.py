@@ -320,17 +320,20 @@ class TestRma(SavepointCase):
         # One refund per partner
         self.assertNotEqual(refund_1.partner_id, refund_2.partner_id)
         self.assertEqual(
-            refund_1.partner_id, (rma_1 | rma_2 | rma_3).mapped("partner_invoice_id"),
+            refund_1.partner_id,
+            (rma_1 | rma_2 | rma_3).mapped("partner_invoice_id"),
         )
         self.assertEqual(refund_2.partner_id, rma_4.partner_invoice_id)
         # Each RMA (rma_1, rma_2 and rma_3) is linked with a different
         # line of refund_1
         self.assertEqual(len(refund_1.invoice_line_ids), 3)
         self.assertEqual(
-            refund_1.invoice_line_ids.mapped("rma_id"), (rma_1 | rma_2 | rma_3),
+            refund_1.invoice_line_ids.mapped("rma_id"),
+            (rma_1 | rma_2 | rma_3),
         )
         self.assertEqual(
-            (rma_1 | rma_2 | rma_3).mapped("refund_line_id"), refund_1.invoice_line_ids,
+            (rma_1 | rma_2 | rma_3).mapped("refund_line_id"),
+            refund_1.invoice_line_ids,
         )
         # rma_4 is linked with the unique line of refund_2
         self.assertEqual(len(refund_2.invoice_line_ids), 1)
@@ -362,7 +365,8 @@ class TestRma(SavepointCase):
         )
         delivery_form = Form(
             self.env["rma.delivery.wizard"].with_context(
-                active_ids=rma.ids, rma_delivery_type="replace",
+                active_ids=rma.ids,
+                rma_delivery_type="replace",
             )
         )
         delivery_form.product_id = product_2
@@ -389,7 +393,8 @@ class TestRma(SavepointCase):
         )
         delivery_form = Form(
             self.env["rma.delivery.wizard"].with_context(
-                active_ids=rma.ids, rma_delivery_type="replace",
+                active_ids=rma.ids,
+                rma_delivery_type="replace",
             )
         )
         delivery_form.product_id = product_3
@@ -432,7 +437,8 @@ class TestRma(SavepointCase):
         # Return the same product with quantity 2 to the customer.
         delivery_form = Form(
             self.env["rma.delivery.wizard"].with_context(
-                active_ids=rma.ids, rma_delivery_type="return",
+                active_ids=rma.ids,
+                rma_delivery_type="return",
             )
         )
         delivery_form.product_uom_qty = 2
@@ -464,7 +470,8 @@ class TestRma(SavepointCase):
         # Return the remaining quantity to the customer
         delivery_form = Form(
             self.env["rma.delivery.wizard"].with_context(
-                active_ids=rma.ids, rma_delivery_type="return",
+                active_ids=rma.ids,
+                rma_delivery_type="return",
             )
         )
         delivery_wizard = delivery_form.save()
@@ -531,17 +538,20 @@ class TestRma(SavepointCase):
         # One picking per partner
         self.assertNotEqual(pick_1.partner_id, pick_2.partner_id)
         self.assertEqual(
-            pick_1.partner_id, (rma_1 | rma_2 | rma_3).mapped("partner_id"),
+            pick_1.partner_id,
+            (rma_1 | rma_2 | rma_3).mapped("partner_id"),
         )
         self.assertEqual(pick_2.partner_id, rma_4.partner_id)
         # Each RMA of (rma_1, rma_2 and rma_3) is linked to a different
         # line of picking_1
         self.assertEqual(len(pick_1.move_lines), 3)
         self.assertEqual(
-            pick_1.move_lines.mapped("rma_id"), (rma_1 | rma_2 | rma_3),
+            pick_1.move_lines.mapped("rma_id"),
+            (rma_1 | rma_2 | rma_3),
         )
         self.assertEqual(
-            (rma_1 | rma_2 | rma_3).mapped("delivery_move_ids"), pick_1.move_lines,
+            (rma_1 | rma_2 | rma_3).mapped("delivery_move_ids"),
+            pick_1.move_lines,
         )
         # rma_4 is linked with the unique move of pick_2
         self.assertEqual(len(pick_2.move_lines), 1)
@@ -562,7 +572,10 @@ class TestRma(SavepointCase):
         origin_delivery = self._create_delivery()
         return_wizard = (
             self.env["stock.return.picking"]
-            .with_context(active_id=origin_delivery.id, active_ids=origin_delivery.ids,)
+            .with_context(
+                active_id=origin_delivery.id,
+                active_ids=origin_delivery.ids,
+            )
             .create({"create_rma": True, "picking_id": origin_delivery.id})
         )
         return_wizard._onchange_picking_id()
@@ -600,7 +613,8 @@ class TestRma(SavepointCase):
         # Return quantity 4 of the same product to the customer
         delivery_form = Form(
             self.env["rma.delivery.wizard"].with_context(
-                active_ids=rma.ids, rma_delivery_type="return",
+                active_ids=rma.ids,
+                rma_delivery_type="return",
             )
         )
         delivery_form.product_uom_qty = 4
@@ -613,7 +627,10 @@ class TestRma(SavepointCase):
         self.assertTrue(rma.can_be_split)
         split_wizard = (
             self.env["rma.split.wizard"]
-            .with_context(active_id=rma.id, active_ids=rma.ids,)
+            .with_context(
+                active_id=rma.id,
+                active_ids=rma.ids,
+            )
             .create({})
         )
         action = split_wizard.action_split()

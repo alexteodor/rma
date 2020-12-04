@@ -10,7 +10,7 @@ class AccountMove(models.Model):
     _inherit = "account.move"
 
     def post(self):
-        """ Avoids to validate a refund with less quantity of product than
+        """Avoids to validate a refund with less quantity of product than
         quantity in the linked RMA.
         """
         precision = self.env["decimal.precision"].precision_get(
@@ -44,4 +44,7 @@ class AccountMove(models.Model):
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
-    rma_id = fields.Many2one(comodel_name="rma", string="RMA",)
+    rma_id = fields.Many2one(
+        comodel_name="rma",
+        string="RMA",
+    )
