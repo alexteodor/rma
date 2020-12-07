@@ -18,15 +18,18 @@ class Rma(models.Model):
         states={"draft": [("readonly", False)]},
     )
     allowed_picking_ids = fields.Many2many(
-        comodel_name="stock.picking", compute="_compute_allowed_picking_ids",
+        comodel_name="stock.picking",
+        compute="_compute_allowed_picking_ids",
     )
     picking_id = fields.Many2one(domain="[('id', 'in', allowed_picking_ids)]")
     allowed_move_ids = fields.Many2many(
-        comodel_name="sale.order.line", compute="_compute_allowed_move_ids",
+        comodel_name="sale.order.line",
+        compute="_compute_allowed_move_ids",
     )
     move_id = fields.Many2one(domain="[('id', 'in', allowed_move_ids)]")
     allowed_product_ids = fields.Many2many(
-        comodel_name="product.product", compute="_compute_allowed_product_ids",
+        comodel_name="product.product",
+        compute="_compute_allowed_product_ids",
     )
     product_id = fields.Many2one(domain="[('id', 'in', allowed_product_ids)]")
 
