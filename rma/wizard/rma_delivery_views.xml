@@ -54,14 +54,14 @@
             </form>
         </field>
     </record>
-    <act_window
-        id="rma_delivery_wizard_action"
-        name="Return to customer"
-        binding_model="rma"
-        binding_views="list"
-        res_model="rma.delivery.wizard"
-        view_mode="form"
-        target="new"
-        context="{'rma_delivery_type': 'return'}"
-    />
+    
+    <record id="rma_delivery_wizard_action" model="ir.actions.act_window">
+        <field name="name">Return to customer</field>
+        <field name="res_model">rma.delivery.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="binding_model_id" ref="rma.model_rma" />
+        <field name="binding_view_types">list</field>
+        <field name="target">new</field>
+        <field name="context">{'rma_delivery_type': 'return'}</field>
+    </record>
 </odoo>

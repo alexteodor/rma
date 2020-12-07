@@ -66,14 +66,9 @@ class RmaReDeliveryWizard(models.TransientModel):
 
     @api.onchange("product_id")
     def _onchange_product_id(self):
-        domain_product_uom = []
         if self.product_id:
-            domain_product_uom = [
-                ("category_id", "=", self.product_id.uom_id.category_id.id)
-            ]
             if not self.product_uom or self.product_id.uom_id.id != self.product_uom.id:
                 self.product_uom = self.product_id.uom_id
-        return {"domain": {"product_uom": domain_product_uom}}
 
     def action_deliver(self):
         self.ensure_one()

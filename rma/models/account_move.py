@@ -9,7 +9,7 @@ from odoo.tools import float_compare
 class AccountMove(models.Model):
     _inherit = "account.move"
 
-    def post(self):
+    def action_post(self):
         """Avoids to validate a refund with less quantity of product than
         quantity in the linked RMA.
         """
@@ -33,7 +33,7 @@ class AccountMove(models.Model):
                     "less than the quantity specified in its linked RMA."
                 )
             )
-        return super().post()
+        return super().action_post()
 
     def unlink(self):
         rma = self.mapped("invoice_line_ids.rma_id")
