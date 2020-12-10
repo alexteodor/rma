@@ -54,7 +54,7 @@
             </form>
         </field>
     </record>
-    
+
     <record id="rma_delivery_wizard_action" model="ir.actions.act_window">
         <field name="name">Return to customer</field>
         <field name="res_model">rma.delivery.wizard</field>
