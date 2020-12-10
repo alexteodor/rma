@@ -12,6 +12,7 @@
     "license": "AGPL-3",
     "depends": ["rma", "sale_stock"],
     "data": [
+        "security/ir.model.access.csv",
         "views/assets.xml",
         "views/report_rma.xml",
         "views/rma_views.xml",

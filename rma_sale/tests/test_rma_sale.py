@@ -75,6 +75,6 @@ class TestRmaSale(SavepointCase):
         order.user_id = user.id
         rma.action_confirm()
         rma.reception_move_id.quantity_done = rma.product_uom_qty
-        rma.reception_move_id.picking_id.action_done()
+        rma.reception_move_id.picking_id._action_done()
         rma.action_refund()
         self.assertEqual(rma.refund_id.user_id, user)
