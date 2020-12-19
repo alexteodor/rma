@@ -10,11 +10,6 @@ class ReturnPicking(models.TransientModel):
 
     create_rma = fields.Boolean(string="Create RMAs")
     picking_type_code = fields.Selection(
-        selection=[
-            ("incoming", "Vendors"),
-            ("outgoing", "Customers"),
-            ("internal", "Internal"),
-        ],
         related="picking_id.picking_type_id.code",
         store=True,
         readonly=True,
