@@ -485,15 +485,19 @@ class Rma(models.Model):
                 )
                 self.location_id = warehouse.rma_loc_id.id
 
+    def update_rma_name(self, vals):
+        if vals.get("name", _("New")) == _("New"):
+            ir_sequence = self.env["ir.sequence"]
+            if "company_id" in vals:
+                ir_sequence = ir_sequence.with_company(vals["company_id"])
+            vals["name"] = ir_sequence.next_by_code("rma")
+        return vals
+
     # CRUD methods (ORM overrides)
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            if vals.get("name", _("New")) == _("New"):
-                ir_sequence = self.env["ir.sequence"]
-                if "company_id" in vals:
-                    ir_sequence = ir_sequence.with_company(vals["company_id"])
-                vals["name"] = ir_sequence.next_by_code("rma")
+            vals = self.update_rma_name(vals)
             # Assign a default team_id which will be the first in the sequence
             if "team_id" not in vals:
                 vals["team_id"] = self.env["rma.team"].search([], limit=1).id
@@ -1065,6 +1069,14 @@ class Rma(models.Model):
         if self.state != "waiting_replacement":
             self.state = "waiting_replacement"
 
+    def _get_procurement_group_vals(self):
+        self.ensure_one()
+        return {
+            "name": self.name,
+            "move_type": "direct",
+            "partner_id": self.partner_id.id,
+        }
+
     def _action_launch_stock_rule(
         self,
         scheduled_date,
@@ -1082,13 +1094,7 @@ class Rma(models.Model):
         if not self.procurement_group_id:
             self.procurement_group_id = (
                 self.env["procurement.group"]
-                .create(
-                    {
-                        "name": self.name,
-                        "move_type": "direct",
-                        "partner_id": self.partner_id.id,
-                    }
-                )
+                .create(self._get_procurement_group_vals())
                 .id
             )
         values = self._prepare_procurement_values(
