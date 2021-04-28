@@ -81,6 +81,14 @@ class Rma(models.Model):
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help="Refund address for current RMA.",
     )
+    partner_shipping_id = fields.Many2one(
+        string="Shipping Address",
+        comodel_name="res.partner",
+        readonly=True,
+        states={"draft": [("readonly", False)]},
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        help="Delivery address for current RMA",
+    )
     commercial_partner_id = fields.Many2one(
         comodel_name="res.partner",
         related="partner_id.commercial_partner_id",
@@ -444,10 +452,13 @@ class Rma(models.Model):
     def _onchange_partner_id(self):
         self.picking_id = False
         partner_invoice_id = False
+        partner_shipping_id = False
         if self.partner_id:
-            address = self.partner_id.address_get(["invoice"])
+            address = self.partner_id.address_get(["invoice", "delivery"])
             partner_invoice_id = address.get("invoice", False)
+            partner_shipping_id = address.get("delivery", False)
         self.partner_invoice_id = partner_invoice_id
+        self.partner_shipping_id = partner_shipping_id
 
     @api.onchange("picking_id")
     def _onchange_picking_id(self):

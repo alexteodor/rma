@@ -240,6 +240,7 @@
                                 options="{'always_reload': True}"
                             />
                             <field name="partner_invoice_id" />
+                            <field name="partner_shipping_id" />
                             <field name="picking_id" options="{'no_create': True}" />
                             <field
                                 name="move_id"
